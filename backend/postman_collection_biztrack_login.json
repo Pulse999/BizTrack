@@ -1,0 +1,72 @@
+{
+  "info": {
+    "name": "BizTrack Learning Hub - Login Flow",
+    "_postman_id": "biztrack-login-collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "BizTrack Direct - universal_login (test)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "Email", "value": "merchie111@biztrack.co.za" },
+            { "key": "Password", "value": "BizPa$$9!!" },
+            { "key": "DeviceType", "value": "1" },
+            { "key": "DeviceID", "value": "" },
+            { "key": "Key", "value": "BizTrack@123#WebAPI" },
+            { "key": "FirebaseToken", "value": "" },
+            { "key": "BuildVersion", "value": "1.0" }
+          ]
+        },
+        "url": {
+          "raw": "https://stage.biztrack.co.za/php/api/merchy_api/universal_login",
+          "protocol": "https",
+          "host": ["stage","biztrack","co","za"],
+          "path": ["php","api","merchy_api","universal_login"]
+        }
+      }
+    },
+    {
+      "name": "Backend: POST /api/auth/login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"merchie111@biztrack.co.za\",\n  \"password\": \"BizPa$$9!!\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "Admin: GET /api/admin/users (requires Bearer token)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/admin/users",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "admin", "users"]
+        }
+      }
+    }
+  ]
+}

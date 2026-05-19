@@ -1,0 +1,41 @@
+{
+  "name": "biztrack-learning-hub-backend",
+  "version": "1.0.0",
+  "description": "Backend for BizTrack Learning Hub",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon --watch src --exec \"ts-node -r dotenv/config src/index.ts\"",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@sparticuz/chromium": "^148.0.0",
+    "@supabase/supabase-js": "^2.81.0",
+    "axios": "^1.12.2",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "fs-extra": "^11.3.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "pg": "^8.16.3",
+    "puppeteer": "^24.26.1",
+    "puppeteer-core": "^25.0.2",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^24.9.1",
+    "@types/uuid": "^10.0.0",
+    "ts-node-dev": "^2.0.0",
+    "ts-node": "^10.9.2",
+    "nodemon": "^3.0.1",
+    "typescript": "5.8.3"
+  }
+}

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BizTrack Learning Hub - Certificate of Completion</title>
+    <style>
+      /* Modern Tech-style Certificate for BizTrack */
+      :root {
+        --bg-1: #0f1724; /* deep navy */
+        --accent: #00e6cf; /* bright turquoise */
+        --accent-2: #5eead4; /* lighter turquoise */
+        --glass: rgba(255, 255, 255, 0.06);
+        --muted: #9aa4b2;
+        --paper: #0b1220; /* dark paper for printing on dark theme */
+        --white: #ffffff;
+        --print-border: #00a79d;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial;
+        background: radial-gradient(
+            1200px 600px at 10% 10%,
+            rgba(0, 150, 136, 0.06),
+            transparent 10%
+          ),
+          linear-gradient(180deg, #071026 0%, #0f1724 100%);
+        color: var(--white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      /* Certificate canvas */
+      .certificate-wrap {
+        width: 11in; /* friendly for print A4 landscape */
+        max-width: 1180px;
+        aspect-ratio: 11/8.5;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        border-radius: 12px;
+        padding: 28px;
+        position: relative;
+        box-shadow: 0 30px 80px rgba(2, 6, 23, 0.7),
+          inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        overflow: hidden;
+      }
+
+      /* subtle tech grid */
+      .certificate-wrap:before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.06;
+        background-image: linear-gradient(
+            transparent 94%,
+            rgba(255, 255, 255, 0.02) 96%
+          ),
+          linear-gradient(90deg, transparent 94%, rgba(255, 255, 255, 0.02) 96%);
+        background-size: 100% 40px, 40px 100%;
+        pointer-events: none;
+      }
+
+      .card {
+        height: 100%;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        border-radius: 8px;
+        padding: 36px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        z-index: 2;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+      }
+
+      header.cert-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .logo {
+        width: 140px;
+        height: auto;
+        flex-shrink: 0;
+      }
+
+      .title-block {
+        flex: 1;
+      }
+      .certificate-title {
+        font-size: 28px;
+        letter-spacing: 2px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .certificate-sub {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 6px;
+      }
+
+      main.cert-body {
+        display: flex;
+        gap: 28px;
+        align-items: center;
+      }
+      .left {
+        flex: 1;
+        padding: 18px;
+      }
+      .right {
+        width: 220px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .awarded {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .recipient {
+        font-size: 44px;
+        font-weight: 800;
+        color: var(--white);
+        margin: 10px 0;
+        letter-spacing: 0.6px;
+        background: linear-gradient(90deg, var(--white), #cfeff0);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .course {
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 20px;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 12px;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 14px;
+        padding-top: 18px;
+        border-top: 1px dashed rgba(255, 255, 255, 0.03);
+      }
+      .footer .col {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .value {
+        font-weight: 700;
+        color: var(--white);
+      }
+
+      /* signature / id */
+      .sig-line {
+        width: 180px;
+        border-top: 2px solid rgba(255, 255, 255, 0.14);
+        height: 18px;
+      }
+
+      /* right column: seal / QR */
+      .seal {
+        width: 140px;
+        height: 140px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+      }
+      .seal .s1 {
+        font-weight: 800;
+        font-size: 10px;
+        letter-spacing: 1px;
+        color: #012;
+        opacity: 0.95;
+      }
+      .seal .s2 {
+        font-weight: 700;
+        font-size: 18px;
+        margin-top: 6px;
+        color: #012;
+      }
+
+      .qr {
+        width: 86px;
+        height: 86px;
+        background: #fff;
+        border-radius: 6px;
+        display: block;
+      }
+
+      /* decorative svg lines top-right */
+      .tech-lines {
+        position: absolute;
+        right: -40px;
+        top: -40px;
+        opacity: 0.16;
+        transform: rotate(14deg);
+      }
+
+      /* Print styles for A4 landscape */
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      @media print {
+        body {
+          background: white;
+        }
+        .certificate-wrap {
+          box-shadow: none;
+          border-radius: 0;
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 900px) {
+        .certificate-wrap {
+          width: 100%;
+          aspect-ratio: auto;
+        }
+        main.cert-body {
+          flex-direction: column;
+        }
+        .right {
+          width: 100%;
+          flex-direction: row;
+          justify-content: space-between;
+        }
+        .recipient {
+          font-size: 32px;
+        }
+      }
+
+      /* helper for visually-hidden */
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="certificate-wrap">
+      <svg
+        class="tech-lines"
+        width="420"
+        height="320"
+        viewBox="0 0 420 320"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden
+      >
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1">
+            <stop offset="0" stop-color="#00e6cf" stop-opacity="0.7" />
+            <stop offset="1" stop-color="#5eead4" stop-opacity="0.3" />
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="420" height="320" rx="12" fill="url(#g1)" />
+        <g stroke="#fff" stroke-opacity="0.18" stroke-width="1">
+          <path d="M20 40 L380 40" />
+          <path d="M20 80 L380 80" />
+          <path d="M20 120 L380 120" />
+          <path d="M20 160 L380 160" />
+        </g>
+      </svg>
+
+      <div class="card" role="article" aria-labelledby="cert-title">
+        <header class="cert-header">
+          <svg
+            class="logo"
+            viewBox="0 0 200 60"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden
+          >
+            <circle cx="30" cy="30" r="20" fill="#00E6CF" />
+            <circle cx="30" cy="30" r="10" fill="#072127" />
+            <text
+              x="60"
+              y="38"
+              font-family="Inter, Arial"
+              font-size="24"
+              font-weight="700"
+              fill="#E6FFF9"
+            >
+              BizTrack
+            </text>
+          </svg>
+
+          <div class="title-block">
+            <div id="cert-title" class="certificate-title">
+              CERTIFICATE OF COMPLETION
+            </div>
+            <div class="certificate-sub">
+              BizTrack Learning Hub • Empowering modern teams
+            </div>
+          </div>
+
+          <div style="width: 88px; text-align: right">
+            <div class="label">Issued</div>
+            <div id="date-issued" class="value">--</div>
+          </div>
+        </header>
+
+        <main class="cert-body">
+          <div class="left">
+            <div class="awarded">This is to certify that</div>
+            <div id="recipient" class="recipient">John Doe</div>
+            <div class="course">
+              has completed
+              <span id="course" style="display: inline-block"
+                >BizTrack Basics Training</span
+              >
+            </div>
+            <div class="meta">
+              and demonstrated competency in the assessed topics.
+            </div>
+
+            <div
+              style="
+                margin-top: 18px;
+                display: flex;
+                gap: 20px;
+                align-items: center;
+              "
+            >
+              <div>
+                <div class="label">Final Score</div>
+                <div id="score" class="value">95%</div>
+              </div>
+
+              <div>
+                <div class="label">Certificate ID</div>
+                <div id="cert-id" class="value">BT-2025-00123</div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="right" aria-label="certificate verification">
+            <div class="seal" aria-hidden>
+              <div class="s1">VERIFIED</div>
+              <div class="s2">COMPLETION</div>
+            </div>
+
+            <div style="text-align: center">
+              <div class="label">Verify</div>
+              <img id="qr" class="qr" alt="QR code placeholder" src="" />
+            </div>
+          </aside>
+        </main>
+
+        <footer class="footer">
+          <div class="col">
+            <div class="sig-line" aria-hidden></div>
+            <div class="label">Authorized Signature</div>
+            <div class="value">BizTrack Training Manager</div>
+          </div>
+
+          <div class="col" style="align-items: flex-end">
+            <div class="label">Download</div>
+            <div style="display: flex; gap: 8px">
+              <button
+                onclick="window.print()"
+                style="
+                  background: transparent;
+                  border: 1px solid rgba(255, 255, 255, 0.06);
+                  color: var(--white);
+                  padding: 8px 12px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                "
+              >
+                Print / Save PDF
+              </button>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <script>
+      // Populate dynamic data (replace with server-side render or template variables in production)
+      (function () {
+        const data = {
+          recipientName: "John Doe",
+          courseName: "BizTrack Basics Training",
+          score: 95,
+          dateIssued: new Date().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+          certificateId: `BT-${new Date().getFullYear()}-${String(
+            Math.floor(Math.random() * 90000) + 10000
+          )}`,
+        };
+
+        document.getElementById("recipient").textContent = data.recipientName;
+        document.getElementById("course").textContent = data.courseName;
+        document.getElementById("score").textContent = data.score + "%";
+        document.getElementById("date-issued").textContent = data.dateIssued;
+        document.getElementById("cert-id").textContent = data.certificateId;
+
+        // Optional: generate a simple QR using Google Chart API (network) or server-side QR generator.
+        // For production, replace with an internal QR generator or embed verification URL.
+        const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(
+          "https://biztrack.example/verify/" + data.certificateId
+        )}`;
+        const qrImg = document.getElementById("qr");
+        qrImg.src = qrUrl;
+        qrImg.alt = "Scan to verify certificate";
+      })();
+    </script>
+  </body>
+</html>

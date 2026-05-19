@@ -1,0 +1,28 @@
+# Ignore ALL node_modules folders (recursive)
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs
+*.log
+
+# Env files
+.env
+.env.*
+.env.*.local
+
+# Build output
+dist/
+build/
+.cache/
+
+# IDE Stuff
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
