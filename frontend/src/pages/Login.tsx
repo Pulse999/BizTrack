@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiLogin, saveAuth } from "../services/auth";
+import logo from "../assets/biztrack-logo.png";
 
 const Login = () => {
   const [email, setEmail] = useState("merchie111@biztrack.co.za");
@@ -37,9 +38,9 @@ const Login = () => {
 
       saveAuth(resp.token, resp.user);
 
-  // redirect based on admin or super-admin flag
-  const isAdmin = !!(resp.user.is_admin || resp.user.is_super_admin);
-  navigate(isAdmin ? "/admin" : "/dashboard");
+      // redirect based on admin or super-admin flag
+      const isAdmin = !!(resp.user.is_admin || resp.user.is_super_admin);
+      navigate(isAdmin ? "/admin" : "/dashboard");
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
@@ -52,11 +53,7 @@ const Login = () => {
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-4 text-center pb-8">
           <div className="flex justify-center">
-            <img
-              src="/src/assets/biztrack-logo.png"
-              alt="BizTrack Logo"
-              className="h-16 w-auto"
-            />
+            <img src={logo} alt="BizTrack Logo" className="h-16 w-auto" />
           </div>
           <div>
             <CardTitle className="text-3xl font-bold text-primary">
