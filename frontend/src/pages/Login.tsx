@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiLogin, saveAuth } from "../services/auth";
-import logo from "../assets/biztrack-logo.png";
+import logo from "@/assets/biztrack-logo.png";
 
 const Login = () => {
   const [email, setEmail] = useState("merchie111@biztrack.co.za");
