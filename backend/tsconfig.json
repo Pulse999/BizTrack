@@ -14,15 +14,15 @@
     "strictNullChecks": false,
     "target": "es6",
     "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "src/**/*"
-  ],
+  "src/**/*",
+  "api/**/*"
+],
   "exclude": [
     "node_modules"
   ]
