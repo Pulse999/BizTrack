@@ -1,6 +1,6 @@
 // frontend/src/services/api.ts
 
-const API_URL = import.meta.env.VITE_API_URL || "https://biz-track-roan.vercel.app/";
+const API_URL = import.meta.env.VITE_API_URL || "https://biz-track-roan.vercel.app/api";
 
 /**
  * Build request headers, including Authorization token.
