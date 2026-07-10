@@ -25,15 +25,13 @@
     "multer": "^2.0.2",
     "pg": "^8.16.3",
     "puppeteer": "^24.26.1",
-    "puppeteer-core": "^25.0.2",
-    "uuid": "^9.0.1"
+    "puppeteer-core": "^25.0.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.9.1",
-    "@types/uuid": "^10.0.0",
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",

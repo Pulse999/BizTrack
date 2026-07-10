@@ -1,7 +1,7 @@
 // backend/src/controllers/certificatesController.ts
 import { Request, Response } from "express";
 import { pool } from "../services/db";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { certBucket, buildPublicUrl } from "../services/supabase";
 import puppeteer from "puppeteer";
@@ -132,7 +132,7 @@ export const generateCertificate = async (req: AuthRequest, res: Response) => {
         });
       }
 
-      const certificateNum = `BT-${new Date().getFullYear()}-${uuidv4().slice(
+      const certificateNum = `BT-${new Date().getFullYear()}-${randomUUID().slice(
         0,
         8
       )}`;

@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { pool } from "../services/db";
 import { supabase, COURSE_IMAGES_BUCKET, extractObjectPathFromPublicUrl, removeObjectByPublicUrl, buildPublicUrl } from "../services/supabase";
 import { AuthRequest, canManageCourse } from "../middleware/authMiddleware";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import updateCourseProgress from "../utils/updateProgress";
 
 /* -----------------------------------------------------
@@ -371,7 +371,7 @@ export const uploadCourseImage = async (req: AuthRequest, res: Response) => {
         .json({ success: false, error: "No file uploaded" });
 
     const ext = file.originalname.split(".").pop();
-    const filePath = `course_${uuidv4()}.${ext}`;
+    const filePath = `course_${randomUUID()}.${ext}`;
 
     const { error } = await supabase.storage
       .from(COURSE_IMAGES_BUCKET)
