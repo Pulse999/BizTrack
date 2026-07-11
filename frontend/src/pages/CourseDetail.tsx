@@ -48,7 +48,7 @@ const CourseDetail = () => {
 
     const loadCourse = async () => {
       try {
-        const data = await apiGet(`/api/courses/${id}`);
+        const data = await apiGet(`/courses/${id}`);
         if (data.success) {
           setCourse(data.course);
           setVideos(data.videos || []);
@@ -72,7 +72,7 @@ const CourseDetail = () => {
     if (quizReviews[quizId]) return; // already loaded
 
     try {
-      const res = await apiGet(`/api/quiz/${quizId}/attempt/latest`);
+      const res = await apiGet(`/quiz/${quizId}/attempt/latest`);
       if (res.success && res.attempt) {
         // Normalize structure expected by UI (some backends return different fields)
         setQuizReviews((prev) => ({
@@ -117,7 +117,7 @@ const CourseDetail = () => {
     setCertLoading(true);
 
     try {
-      const res = await apiPost(`/api/certificates/generate/${id}`, {}, false);
+      const res = await apiPost(`/certificates/generate/${id}`, {}, false);
 
       if (res.success && res.certificate) {
         toast({
@@ -154,7 +154,7 @@ const CourseDetail = () => {
     if (!id) return;
     setSubmittingRating(true);
     try {
-      const res = await apiPost(`/api/courses/${id}/rate`, { rating: value });
+      const res = await apiPost(`/courses/${id}/rate`, { rating: value });
 
       if (res.success) {
         setUserRating(res.user_rating ?? value);
@@ -360,8 +360,8 @@ const CourseDetail = () => {
                             attemptsExceeded
                               ? "bg-red-50"
                               : quizPassed
-                              ? "bg-green-50"
-                              : "bg-secondary/30"
+                                ? "bg-green-50"
+                                : "bg-secondary/30"
                           }`}
                         >
                           <div className="flex items-center justify-between">
@@ -371,8 +371,8 @@ const CourseDetail = () => {
                                   attemptsExceeded
                                     ? "text-red-600"
                                     : quizPassed
-                                    ? "text-green-600"
-                                    : "text-primary"
+                                      ? "text-green-600"
+                                      : "text-primary"
                                 }`}
                               />
                               <div>
@@ -409,9 +409,7 @@ const CourseDetail = () => {
                                 variant={quizPassed ? "outline" : "default"}
                               >
                                 <Link to={`/video/${v.video_id}#quiz`}>
-                                  {quizPassed
-                                    ? "Review Answers"
-                                    : "Take Quiz"}
+                                  {quizPassed ? "Review Answers" : "Take Quiz"}
                                 </Link>
                               </Button>
                             )}
@@ -438,8 +436,8 @@ const CourseDetail = () => {
 
                               {quizOpen[quiz.quiz_id] && (
                                 <div className="mt-4 space-y-3 p-3 bg-white border rounded-md">
-                                  {quizReviews[quiz.quiz_id]?.results
-                                    ?.length > 0 ? (
+                                  {quizReviews[quiz.quiz_id]?.results?.length >
+                                  0 ? (
                                     quizReviews[quiz.quiz_id].results.map(
                                       (r: any, idx: number) => (
                                         <div
@@ -448,14 +446,19 @@ const CourseDetail = () => {
                                         >
                                           <div className="flex items-center justify-between">
                                             <p className="font-medium">
-                                              {r.question_text ?? `Question ${idx + 1}`}
+                                              {r.question_text ??
+                                                `Question ${idx + 1}`}
                                             </p>
                                             <span
                                               className={`text-sm font-semibold ${
-                                                r.correct ? "text-green-600" : "text-red-600"
+                                                r.correct
+                                                  ? "text-green-600"
+                                                  : "text-red-600"
                                               }`}
                                             >
-                                              {r.correct ? "Correct" : "Incorrect"}
+                                              {r.correct
+                                                ? "Correct"
+                                                : "Incorrect"}
                                             </span>
                                           </div>
 
@@ -465,11 +468,12 @@ const CourseDetail = () => {
 
                                           {!r.correct && (
                                             <p className="mt-1 text-sm text-green-600">
-                                              Correct answer: {r.correct_answer_text}
+                                              Correct answer:{" "}
+                                              {r.correct_answer_text}
                                             </p>
                                           )}
                                         </div>
-                                      )
+                                      ),
                                     )
                                   ) : (
                                     <p className="text-sm text-muted-foreground">

@@ -43,9 +43,9 @@ const VideoPlayer = () => {
   const [videoCompleted, setVideoCompleted] = useState(false);
   const [quizStatus, setQuizStatus] = useState<any>(null);
   const [quizOpen, setQuizOpen] = useState(false);
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>(
-    {}
-  );
+  const [selectedAnswers, setSelectedAnswers] = useState<
+    Record<number, number>
+  >({});
   const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -61,7 +61,7 @@ const VideoPlayer = () => {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const embedUrl = useMemo(
     () => parseYouTube(video?.video_url || ""),
-    [video?.video_url]
+    [video?.video_url],
   );
   const { toast } = useToast();
 
@@ -78,7 +78,7 @@ const VideoPlayer = () => {
     const load = async () => {
       if (!id) return;
       try {
-        const data = await apiGet(`/api/videos/${id}`);
+        const data = await apiGet(`/videos/${id}`);
         if (data.success) {
           setVideo(data.video);
           setCourse(data.course);
@@ -97,11 +97,11 @@ const VideoPlayer = () => {
     const loadStatus = async () => {
       try {
         if (video?.video_id) {
-          const v = await apiGet(`/api/progress/video/${video.video_id}/status`);
+          const v = await apiGet(`/progress/video/${video.video_id}/status`);
           setVideoCompleted(v.completed || false);
         }
         if (quiz?.quiz_id) {
-          const s = await apiGet(`/api/progress/quiz/${quiz.quiz_id}/status`);
+          const s = await apiGet(`/progress/quiz/${quiz.quiz_id}/status`);
           setQuizStatus(s);
         }
       } catch (err) {
@@ -121,7 +121,7 @@ const VideoPlayer = () => {
       setLatestAttemptFetched(true);
 
       try {
-        const res = await apiGet(`/api/quiz/${quiz.quiz_id}/attempt/latest`);
+        const res = await apiGet(`/quiz/${quiz.quiz_id}/attempt/latest`);
         if (res && res.success && res.attempt) {
           setResult({
             passed: !!res.attempt.passed,
@@ -136,14 +136,14 @@ const VideoPlayer = () => {
         // ignore - fallback below
       }
 
-      // Fallback: fetch /api/quiz to synthesize a conservative review (don't reveal user answers)
+      // Fallback: fetch /quiz to synthesize a conservative review (don't reveal user answers)
       try {
-        const q = await apiGet(`/api/quiz/${quiz.quiz_id}`);
+        const q = await apiGet(`/quiz/${quiz.quiz_id}`);
         if (q && q.success && q.quiz) {
           const questions = q.quiz.questions || [];
           const synthesizedResults = questions.map((question: any) => {
             const correctAnswer = (question.answers || []).find(
-              (a: any) => a.is_correct
+              (a: any) => a.is_correct,
             );
             return {
               question_id: question.question_id,
@@ -193,14 +193,10 @@ const VideoPlayer = () => {
   const markComplete = async () => {
     if (!video?.video_id) return;
     try {
-      await apiPost(
-        `/api/progress/video/${video.video_id}/complete`,
-        {},
-        false
-      );
+      await apiPost(`/progress/video/${video.video_id}/complete`, {}, false);
       setVideoCompleted(true);
       if (quiz?.quiz_id) {
-        const s = await apiGet(`/api/progress/quiz/${quiz.quiz_id}/status`);
+        const s = await apiGet(`/progress/quiz/${quiz.quiz_id}/status`);
         setQuizStatus(s);
       }
     } catch (err) {
@@ -227,9 +223,12 @@ const VideoPlayer = () => {
   // helper: compute badge from score (Gold >=90, Silver >=75, Bronze >=50)
   const badgeForScore = (score: number | null | undefined) => {
     if (score == null) return null;
-    if (score >= 90) return { label: "Gold", color: "bg-yellow-400", icon: "★" };
-    if (score >= 75) return { label: "Silver", color: "bg-slate-300", icon: "★" };
-    if (score >= 50) return { label: "Bronze", color: "bg-amber-200", icon: "★" };
+    if (score >= 90)
+      return { label: "Gold", color: "bg-yellow-400", icon: "★" };
+    if (score >= 75)
+      return { label: "Silver", color: "bg-slate-300", icon: "★" };
+    if (score >= 50)
+      return { label: "Bronze", color: "bg-amber-200", icon: "★" };
     return null;
   };
 
@@ -238,21 +237,27 @@ const VideoPlayer = () => {
     setSubmitting(true);
     setConfirmOpen(false);
 
-    const answers = Object.entries(selectedAnswers).map(([question_id, answer_id]) => ({
-      question_id: Number(question_id),
-      selected_answer_id: Number(answer_id),
-    }));
+    const answers = Object.entries(selectedAnswers).map(
+      ([question_id, answer_id]) => ({
+        question_id: Number(question_id),
+        selected_answer_id: Number(answer_id),
+      }),
+    );
 
     try {
-      const r = await apiPost(`/api/quiz/${quiz.quiz_id}/attempt`, { answers }, false);
+      const r = await apiPost(
+        `/quiz/${quiz.quiz_id}/attempt`,
+        { answers },
+        false,
+      );
 
       // refresh quiz status
-      const s = await apiGet(`/api/progress/quiz/${quiz.quiz_id}/status`);
+      const s = await apiGet(`/progress/quiz/${quiz.quiz_id}/status`);
       setQuizStatus(s);
 
       // refresh video status (backend may have reset it on lock)
       if (video?.video_id) {
-        const v = await apiGet(`/api/progress/video/${video.video_id}/status`);
+        const v = await apiGet(`/progress/video/${video.video_id}/status`);
         setVideoCompleted(v.completed || false);
       }
 
@@ -273,7 +278,8 @@ const VideoPlayer = () => {
         if (r.passed && r.certificateReady) {
           toast({
             title: "🎉 Congrats — Certificate Ready!",
-            description: "You've completed all course quizzes. You can generate and download your certificate on the course page.",
+            description:
+              "You've completed all course quizzes. You can generate and download your certificate on the course page.",
           });
           setCertReadyOpen(true);
         }
@@ -309,7 +315,7 @@ const VideoPlayer = () => {
       // After successful pass or lock, fetch the latest attempt review to ensure review UI has the exact attempt data.
       if (s.passed || s.locked) {
         try {
-          const latest = await apiGet(`/api/quiz/${quiz.quiz_id}/attempt/latest`);
+          const latest = await apiGet(`/quiz/${quiz.quiz_id}/attempt/latest`);
           if (latest && latest.success && latest.attempt) {
             setResult({
               passed: !!latest.attempt.passed,
@@ -333,7 +339,7 @@ const VideoPlayer = () => {
   const fetchCourseSummary = async () => {
     if (!course?.course_id) return;
     try {
-      const res = await apiGet(`/api/courses/${course.course_id}`);
+      const res = await apiGet(`/courses/${course.course_id}`);
       if (res.success) {
         setCourseSummary(res.course || null);
       } else {
@@ -367,7 +373,10 @@ const VideoPlayer = () => {
   const nextVideo = playlist[currentIndex + 1];
 
   const attemptsLeft = quizStatus
-    ? Math.max(0, (quizStatus.attemptsAllowed ?? 3) - (quizStatus.attemptsUsed ?? 0))
+    ? Math.max(
+        0,
+        (quizStatus.attemptsAllowed ?? 3) - (quizStatus.attemptsUsed ?? 0),
+      )
     : 0;
 
   const isQuizLocked = !!quizStatus?.locked;
@@ -384,7 +393,8 @@ const VideoPlayer = () => {
     }
     // after result: reveal styling
     const resEntry = result.results?.find((r: any) => r.question_id === qId);
-    if (!resEntry) return "flex items-center gap-2 cursor-default p-2 rounded-md";
+    if (!resEntry)
+      return "flex items-center gap-2 cursor-default p-2 rounded-md";
     // when passed — show correct and incorrect (reveal correct answer)
     if (result.passed) {
       if (resEntry.correct) {
@@ -405,14 +415,21 @@ const VideoPlayer = () => {
   };
 
   // Prevent changing answers if quiz is passed/locked or result present (review)
-  const canChangeAnswers = !(isQuizPassed || isQuizLocked || (result && result.passed));
+  const canChangeAnswers = !(
+    isQuizPassed ||
+    isQuizLocked ||
+    (result && result.passed)
+  );
 
   return (
     <div className="min-h-screen bg-secondary/20">
       <Navigation />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <Link to={`/course/${course.course_id}`} className="text-primary hover:underline">
+          <Link
+            to={`/course/${course.course_id}`}
+            className="text-primary hover:underline"
+          >
             ← Back to {course.title}
           </Link>
         </div>
@@ -471,12 +488,16 @@ const VideoPlayer = () => {
                     {result && (
                       <div
                         className={`p-4 rounded-lg mt-2 transform transition-all duration-300 ${
-                          animResult ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                          animResult
+                            ? "opacity-100 scale-100"
+                            : "opacity-0 scale-95"
                         } ${result.passed ? "bg-green-50" : "bg-red-50"}`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className={`font-semibold ${result.passed ? "text-green-700" : "text-red-700"}`}>
+                            <p
+                              className={`font-semibold ${result.passed ? "text-green-700" : "text-red-700"}`}
+                            >
                               {result.passed ? "✅ Passed!" : "❌ Not Passed"}
                             </p>
                             <p className="text-sm text-muted-foreground">
@@ -493,30 +514,52 @@ const VideoPlayer = () => {
                               <span>{badgeForScore(result.score)!.label}</span>
                             </div>
                           ) : (
-                            <div className="text-sm text-muted-foreground">No badge</div>
+                            <div className="text-sm text-muted-foreground">
+                              No badge
+                            </div>
                           )}
                         </div>
 
                         {/* PASS REVIEW */}
-                        {result.passed && result.results && result.results.length > 0 ? (
+                        {result.passed &&
+                        result.results &&
+                        result.results.length > 0 ? (
                           <div className="mt-4 space-y-3">
                             {result.results.map((r: any, idx: number) => {
-                              const q = (quiz.questions || []).find((x: any) => x.question_id === r.question_id);
+                              const q = (quiz.questions || []).find(
+                                (x: any) => x.question_id === r.question_id,
+                              );
                               return (
-                                <div key={idx} className="p-3 border rounded-md bg-white shadow-sm">
+                                <div
+                                  key={idx}
+                                  className="p-3 border rounded-md bg-white shadow-sm"
+                                >
                                   <div className="flex items-center justify-between">
-                                    <p className="font-medium">{q?.text ?? "Question"}</p>
-                                    <span className={`text-sm font-semibold ${r.correct ? "text-green-600" : "text-red-600"}`}>
+                                    <p className="font-medium">
+                                      {q?.text ?? "Question"}
+                                    </p>
+                                    <span
+                                      className={`text-sm font-semibold ${r.correct ? "text-green-600" : "text-red-600"}`}
+                                    >
                                       {r.correct ? "Correct" : "Incorrect"}
                                     </span>
                                   </div>
 
                                   {r.correct ? (
-                                    <p className="mt-2 text-sm text-green-600">✅ Your answer: {r.user_answer_text ?? "—"}</p>
+                                    <p className="mt-2 text-sm text-green-600">
+                                      ✅ Your answer:{" "}
+                                      {r.user_answer_text ?? "—"}
+                                    </p>
                                   ) : (
                                     <>
-                                      <p className="mt-2 text-sm text-red-600">❌ Your answer: {r.user_answer_text ?? "—"}</p>
-                                      <p className="mt-1 text-sm text-green-600">✅ Correct answer: {r.correct_answer_text ?? "—"}</p>
+                                      <p className="mt-2 text-sm text-red-600">
+                                        ❌ Your answer:{" "}
+                                        {r.user_answer_text ?? "—"}
+                                      </p>
+                                      <p className="mt-1 text-sm text-green-600">
+                                        ✅ Correct answer:{" "}
+                                        {r.correct_answer_text ?? "—"}
+                                      </p>
                                     </>
                                   )}
                                 </div>
@@ -524,7 +567,9 @@ const VideoPlayer = () => {
                             })}
                           </div>
                         ) : (
-                          <p className="mt-3 text-sm text-muted-foreground">Review not available for this attempt.</p>
+                          <p className="mt-3 text-sm text-muted-foreground">
+                            Review not available for this attempt.
+                          </p>
                         )}
                       </div>
                     )}
@@ -535,11 +580,15 @@ const VideoPlayer = () => {
                   </p>
                 ) : !videoCompleted ? (
                   <p className="text-yellow-600 flex items-center gap-2">
-                    <AlertCircle className="h-5 w-5" /> Finish video to unlock quiz
+                    <AlertCircle className="h-5 w-5" /> Finish video to unlock
+                    quiz
                   </p>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <Button onClick={() => setQuizOpen(!quizOpen)} disabled={isQuizPassed || isQuizLocked}>
+                    <Button
+                      onClick={() => setQuizOpen(!quizOpen)}
+                      disabled={isQuizPassed || isQuizLocked}
+                    >
                       {quizOpen ? "Hide Quiz" : "Take Quiz"}
                     </Button>
 
@@ -560,27 +609,36 @@ const VideoPlayer = () => {
                 {quizOpen && (
                   <div className="p-4 border rounded-lg bg-secondary/20 space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Attempts left: {attemptsLeft} / {quizStatus?.attemptsAllowed ?? 3}
+                      Attempts left: {attemptsLeft} /{" "}
+                      {quizStatus?.attemptsAllowed ?? 3}
                     </p>
 
                     {/* QUESTIONS */}
                     {quiz.questions?.length > 0 ? (
                       quiz.questions.map((q: any, idx: number) => {
-                        const isUnanswered = unansweredIds.includes(q.question_id);
+                        const isUnanswered = unansweredIds.includes(
+                          q.question_id,
+                        );
                         return (
                           <div
                             key={q.question_id}
                             className={`space-y-2 p-3 rounded-md border transition-all ${
-                              isUnanswered ? "bg-red-50 border-red-300" : "border-transparent hover:shadow-sm"
+                              isUnanswered
+                                ? "bg-red-50 border-red-300"
+                                : "border-transparent hover:shadow-sm"
                             }`}
                           >
                             <div className="flex items-start justify-between">
                               <p className="font-medium">{q.text}</p>
-                              <span className="text-xs text-muted-foreground">Q{idx + 1}</span>
+                              <span className="text-xs text-muted-foreground">
+                                Q{idx + 1}
+                              </span>
                             </div>
 
                             {isUnanswered && (
-                              <p className="text-xs text-red-600 font-medium">⚠️ Please answer this question</p>
+                              <p className="text-xs text-red-600 font-medium">
+                                ⚠️ Please answer this question
+                              </p>
                             )}
 
                             {q.answers?.length > 0 ? (
@@ -592,19 +650,31 @@ const VideoPlayer = () => {
                                   <input
                                     type="radio"
                                     name={`q_${q.question_id}`}
-                                    checked={selectedAnswers[q.question_id] === a.answer_id}
+                                    checked={
+                                      selectedAnswers[q.question_id] ===
+                                      a.answer_id
+                                    }
                                     disabled={!canChangeAnswers}
                                     onChange={() => {
                                       if (!canChangeAnswers) return;
-                                      setSelectedAnswers((prev) => ({ ...prev, [q.question_id]: a.answer_id }));
-                                      setUnansweredIds((prev) => prev.filter((id) => id !== q.question_id));
+                                      setSelectedAnswers((prev) => ({
+                                        ...prev,
+                                        [q.question_id]: a.answer_id,
+                                      }));
+                                      setUnansweredIds((prev) =>
+                                        prev.filter(
+                                          (id) => id !== q.question_id,
+                                        ),
+                                      );
                                     }}
                                   />
                                   <span className="ml-2">{a.text}</span>
                                 </label>
                               ))
                             ) : (
-                              <p className="text-sm text-muted-foreground">No answers.</p>
+                              <p className="text-sm text-muted-foreground">
+                                No answers.
+                              </p>
                             )}
                           </div>
                         );
@@ -613,7 +683,11 @@ const VideoPlayer = () => {
                       <p>No questions in this quiz.</p>
                     )}
 
-                    <Button disabled={submitting || isQuizPassed || isQuizLocked} onClick={handleQuizSubmitClick} className="w-full">
+                    <Button
+                      disabled={submitting || isQuizPassed || isQuizLocked}
+                      onClick={handleQuizSubmitClick}
+                      className="w-full"
+                    >
                       {submitting ? "Submitting…" : "Submit Quiz"}
                     </Button>
 
@@ -621,12 +695,16 @@ const VideoPlayer = () => {
                     {result && (
                       <div
                         className={`p-4 rounded-lg mt-4 transform transition-all duration-300 ${
-                          animResult ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                          animResult
+                            ? "opacity-100 scale-100"
+                            : "opacity-0 scale-95"
                         } ${result.passed ? "bg-green-50" : "bg-red-50"}`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className={`font-semibold ${result.passed ? "text-green-700" : "text-red-700"}`}>
+                            <p
+                              className={`font-semibold ${result.passed ? "text-green-700" : "text-red-700"}`}
+                            >
                               {result.passed ? "✅ Passed! " : "❌ Not Passed"}
                             </p>
                             <p className="text-sm text-muted-foreground">
@@ -643,30 +721,52 @@ const VideoPlayer = () => {
                               <span>{badgeForScore(result.score)!.label}</span>
                             </div>
                           ) : (
-                            <div className="text-sm text-muted-foreground">No badge</div>
+                            <div className="text-sm text-muted-foreground">
+                              No badge
+                            </div>
                           )}
                         </div>
 
                         {/* PASS REVIEW */}
-                        {result.passed && result.results && result.results.length > 0 ? (
+                        {result.passed &&
+                        result.results &&
+                        result.results.length > 0 ? (
                           <div className="mt-4 space-y-3">
                             {result.results.map((r: any, idx: number) => {
-                              const q = (quiz.questions || []).find((x: any) => x.question_id === r.question_id);
+                              const q = (quiz.questions || []).find(
+                                (x: any) => x.question_id === r.question_id,
+                              );
                               return (
-                                <div key={idx} className="p-3 border rounded-md bg-white shadow-sm">
+                                <div
+                                  key={idx}
+                                  className="p-3 border rounded-md bg-white shadow-sm"
+                                >
                                   <div className="flex items-center justify-between">
-                                    <p className="font-medium">{q?.text ?? "Question"}</p>
-                                    <span className={`text-sm font-semibold ${r.correct ? "text-green-600" : "text-red-600"}`}>
+                                    <p className="font-medium">
+                                      {q?.text ?? "Question"}
+                                    </p>
+                                    <span
+                                      className={`text-sm font-semibold ${r.correct ? "text-green-600" : "text-red-600"}`}
+                                    >
                                       {r.correct ? "Correct" : "Incorrect"}
                                     </span>
                                   </div>
 
                                   {r.correct ? (
-                                    <p className="mt-2 text-sm text-green-600">✅ Your answer: {r.user_answer_text ?? "—"}</p>
+                                    <p className="mt-2 text-sm text-green-600">
+                                      ✅ Your answer:{" "}
+                                      {r.user_answer_text ?? "—"}
+                                    </p>
                                   ) : (
                                     <>
-                                      <p className="mt-2 text-sm text-red-600">❌ Your answer: {r.user_answer_text ?? "—"}</p>
-                                      <p className="mt-1 text-sm text-green-600">✅ Correct answer: {r.correct_answer_text ?? "—"}</p>
+                                      <p className="mt-2 text-sm text-red-600">
+                                        ❌ Your answer:{" "}
+                                        {r.user_answer_text ?? "—"}
+                                      </p>
+                                      <p className="mt-1 text-sm text-green-600">
+                                        ✅ Correct answer:{" "}
+                                        {r.correct_answer_text ?? "—"}
+                                      </p>
                                     </>
                                   )}
                                 </div>
@@ -674,14 +774,21 @@ const VideoPlayer = () => {
                             })}
                           </div>
                         ) : (
-                          <p className="mt-3 text-sm text-muted-foreground">Review not available for this attempt.</p>
+                          <p className="mt-3 text-sm text-muted-foreground">
+                            Review not available for this attempt.
+                          </p>
                         )}
 
                         {/* FAIL FEEDBACK */}
                         {!result.passed && (
                           <>
                             <p className="mt-2 text-sm">
-                              Correct answers: {result.results ? result.results.filter((r: any) => r.correct).length : 0} / {result.results ? result.results.length : 0}
+                              Correct answers:{" "}
+                              {result.results
+                                ? result.results.filter((r: any) => r.correct)
+                                    .length
+                                : 0}{" "}
+                              / {result.results ? result.results.length : 0}
                             </p>
 
                             <Button
@@ -692,11 +799,13 @@ const VideoPlayer = () => {
                             >
                               {showFailDetails ? (
                                 <>
-                                  <ChevronUp className="h-4 w-4" /> Hide Feedback
+                                  <ChevronUp className="h-4 w-4" /> Hide
+                                  Feedback
                                 </>
                               ) : (
                                 <>
-                                  <ChevronDown className="h-4 w-4" /> View Feedback
+                                  <ChevronDown className="h-4 w-4" /> View
+                                  Feedback
                                 </>
                               )}
                             </Button>
@@ -704,19 +813,31 @@ const VideoPlayer = () => {
                             {showFailDetails && (
                               <div className="mt-3 space-y-3">
                                 {result.results.map((r: any, idx: number) => {
-                                  const q = quiz.questions.find((x: any) => x.question_id === r.question_id);
+                                  const q = quiz.questions.find(
+                                    (x: any) => x.question_id === r.question_id,
+                                  );
                                   return (
-                                    <div key={idx} className="p-3 border rounded-md bg-white shadow-sm">
+                                    <div
+                                      key={idx}
+                                      className="p-3 border rounded-md bg-white shadow-sm"
+                                    >
                                       <div className="flex items-center justify-between">
                                         <p className="font-medium">{q?.text}</p>
-                                        <span className={`text-sm font-semibold ${r.correct ? "text-green-600" : "text-red-600"}`}>
+                                        <span
+                                          className={`text-sm font-semibold ${r.correct ? "text-green-600" : "text-red-600"}`}
+                                        >
                                           {r.correct ? "Correct" : "Incorrect"}
                                         </span>
                                       </div>
 
-                                      <p className="mt-2 text-sm text-muted-foreground">Your answer: {r.user_answer_text}</p>
+                                      <p className="mt-2 text-sm text-muted-foreground">
+                                        Your answer: {r.user_answer_text}
+                                      </p>
 
-                                      <p className="mt-1 text-xs text-gray-500">Tip: Rewatch the related section of the video.</p>
+                                      <p className="mt-1 text-xs text-gray-500">
+                                        Tip: Rewatch the related section of the
+                                        video.
+                                      </p>
                                     </div>
                                   );
                                 })}
@@ -769,12 +890,18 @@ const VideoPlayer = () => {
           <DialogHeader>
             <DialogTitle>Submit Quiz?</DialogTitle>
             <DialogDescription>
-              Are you sure you want to submit? You have <strong>{attemptsLeft}</strong> attempt{attemptsLeft !== 1 && "s"} remaining.
+              Are you sure you want to submit? You have{" "}
+              <strong>{attemptsLeft}</strong> attempt{attemptsLeft !== 1 && "s"}{" "}
+              remaining.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>Cancel</Button>
-            <Button onClick={submitQuiz} disabled={submitting}>Yes, Submit</Button>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={submitQuiz} disabled={submitting}>
+              Yes, Submit
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -786,7 +913,9 @@ const VideoPlayer = () => {
             <DialogTitle className="text-red-600 font-semibold flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-red-600" /> Incomplete Quiz
             </DialogTitle>
-            <DialogDescription className="text-red-600 font-medium">⚠️ You haven’t answered all questions yet.</DialogDescription>
+            <DialogDescription className="text-red-600 font-medium">
+              ⚠️ You haven’t answered all questions yet.
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button onClick={() => setMissingAnswers(false)}>Okay</Button>
@@ -800,11 +929,14 @@ const VideoPlayer = () => {
           <DialogHeader>
             <DialogTitle>🎉 Congratulations!</DialogTitle>
             <DialogDescription>
-              You have completed all quizzes for this course. Your certificate is ready.
+              You have completed all quizzes for this course. Your certificate
+              is ready.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCertReadyOpen(false)}>Close</Button>
+            <Button variant="outline" onClick={() => setCertReadyOpen(false)}>
+              Close
+            </Button>
             <Button asChild>
               <Link to={`/course/${course.course_id}`}>Go to Course</Link>
             </Button>
@@ -824,11 +956,15 @@ const VideoPlayer = () => {
               <div className="flex justify-between">
                 <div>
                   <p className="font-semibold">{courseSummary.title}</p>
-                  <p className="text-sm text-muted-foreground">{courseSummary.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {courseSummary.description}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Progress</p>
-                  <p className="text-xl font-bold">{courseSummary.progress_percent ?? 0}%</p>
+                  <p className="text-xl font-bold">
+                    {courseSummary.progress_percent ?? 0}%
+                  </p>
                 </div>
               </div>
 
@@ -837,28 +973,38 @@ const VideoPlayer = () => {
                 <div className="flex justify-between">
                   <div>
                     <p className="text-sm">Total quizzes</p>
-                    <p className="font-semibold">{courseSummary.quizzes_count ?? "—"}</p>
+                    <p className="font-semibold">
+                      {courseSummary.quizzes_count ?? "—"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm">Students</p>
-                    <p className="font-semibold">{courseSummary.students_count ?? "—"}</p>
+                    <p className="font-semibold">
+                      {courseSummary.students_count ?? "—"}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="flex justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Estimated badge</p>
+                  <p className="text-sm text-muted-foreground">
+                    Estimated badge
+                  </p>
                   <div className="mt-2">
                     {badgeForScore(courseSummary.progress_percent) ? (
                       <div
                         className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${badgeForScore(courseSummary.progress_percent)!.color} text-sm font-semibold shadow-sm`}
                       >
                         <Star className="h-4 w-4" />
-                        <span>{badgeForScore(courseSummary.progress_percent)!.label}</span>
+                        <span>
+                          {badgeForScore(courseSummary.progress_percent)!.label}
+                        </span>
                       </div>
                     ) : (
-                      <span className="text-sm text-muted-foreground">No badge yet</span>
+                      <span className="text-sm text-muted-foreground">
+                        No badge yet
+                      </span>
                     )}
                   </div>
                 </div>
@@ -867,7 +1013,9 @@ const VideoPlayer = () => {
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground mt-2">Could not load summary.</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Could not load summary.
+            </p>
           )}
         </DialogContent>
       </Dialog>

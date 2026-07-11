@@ -1,4 +1,5 @@
 // frontend/src/services/auth.ts
+
 export type User = {
   user_id: number;
   company_id: number;
@@ -17,10 +18,11 @@ export type LoginResponse = {
   error?: string;
 };
 
-// Use import.meta.env instead of process.env for Vite
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Uses your Vercel backend in production and localhost during development
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-// Centralized role logic ✅
+// Centralized role logic
 export function isAdminUser(user?: User | null): boolean {
   return !!(user?.is_super_admin || user?.is_admin);
 }
@@ -29,37 +31,46 @@ export function isSuperAdminUser(user?: User | null): boolean {
   return !!user?.is_super_admin;
 }
 
-export async function apiLogin(email: string, password: string): Promise<LoginResponse> {
+export async function apiLogin(
+  email: string,
+  password: string
+): Promise<LoginResponse> {
   try {
-    const res = await fetch(`${API_URL}/api/auth/login`, {
+    const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
-        "Accept": "application/json"
+        Accept: "application/json",
       },
-      credentials: 'include',
-      body: JSON.stringify({ email, password }),
+      credentials: "include",
+      body: JSON.stringify({
+        email,
+        password,
+      }),
     });
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => null);
-      return { 
-        success: false, 
-        error: errorData?.error || `Login failed with status ${res.status}`
+
+      return {
+        success: false,
+        error:
+          errorData?.error || `Login failed with status ${res.status}`,
       };
     }
 
     const data = await res.json();
+
     return {
       ...data,
-      success: true
+      success: true,
     } as LoginResponse;
-
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
+
     return {
       success: false,
-      error: 'Network error occurred. Please check your connection.'
+      error: "Network error occurred. Please check your connection.",
     };
   }
 }
@@ -69,8 +80,8 @@ export function saveAuth(token: string, user: User): void {
     localStorage.setItem("lt_token", token);
     localStorage.setItem("lt_user", JSON.stringify(user));
   } catch (error) {
-    console.error('Error saving auth data:', error);
-    throw new Error('Failed to save authentication data');
+    console.error("Error saving auth data:", error);
+    throw new Error("Failed to save authentication data");
   }
 }
 
@@ -79,7 +90,7 @@ export function clearAuth(): void {
     localStorage.removeItem("lt_token");
     localStorage.removeItem("lt_user");
   } catch (error) {
-    console.error('Error clearing auth data:', error);
+    console.error("Error clearing auth data:", error);
   }
 }
 
@@ -87,11 +98,20 @@ export function getAuth(): { token: string | null; user: User | null } {
   try {
     const token = localStorage.getItem("lt_token");
     const userStr = localStorage.getItem("lt_user");
-    const user = userStr ? JSON.parse(userStr) as User : null;
-    return { token, user };
+
+    const user = userStr ? (JSON.parse(userStr) as User) : null;
+
+    return {
+      token,
+      user,
+    };
   } catch (error) {
-    console.error('Error getting auth data:', error);
-    return { token: null, user: null };
+    console.error("Error getting auth data:", error);
+
+    return {
+      token: null,
+      user: null,
+    };
   }
 }
 
@@ -100,7 +120,6 @@ export function isAuthenticated(): boolean {
   return !!(token && user);
 }
 
-// Updated ✅ now just calls centralized helper
 export function isAdmin(): boolean {
   const { user } = getAuth();
   return isAdminUser(user);

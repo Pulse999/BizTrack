@@ -1,5 +1,5 @@
 // frontend/src/pages/Dashboard.tsx
- 
+
 import Navigation from "@/components/Navigation";
 import {
   Card,
@@ -15,13 +15,13 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getAuth } from "../services/auth";
 import { apiGet } from "@/services/api";
- 
+
 type BookmarkedCourse = {
   course_id: number;
   title: string;
   progress_percent?: number;
 };
- 
+
 type EnrolledCourse = {
   course_id: number;
   title: string;
@@ -29,30 +29,34 @@ type EnrolledCourse = {
   videos_count?: number;
   quizzes_count?: number;
 };
- 
+
 const Dashboard = () => {
   const [userName, setUserName] = useState("User");
-  const [bookmarkedCourses, setBookmarkedCourses] = useState<BookmarkedCourse[]>([]);
+  const [bookmarkedCourses, setBookmarkedCourses] = useState<
+    BookmarkedCourse[]
+  >([]);
   const [loadingBookmarks, setLoadingBookmarks] = useState(true);
- 
+
   const [statsLoading, setStatsLoading] = useState(true);
   const [coursesEnrolled, setCoursesEnrolled] = useState<number>(0);
   const [videosWatched, setVideosWatched] = useState<number>(0);
   const [certificatesEarned, setCertificatesEarned] = useState<number>(0);
   const [averageScore, setAverageScore] = useState<number | null>(null);
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
- 
+
   useEffect(() => {
     const { user } = getAuth();
     if (user) {
-      const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ");
+      const fullName = [user.first_name, user.last_name]
+        .filter(Boolean)
+        .join(" ");
       setUserName(fullName || user.email || "User");
     }
- 
+
     // fetch bookmarks (existing)
     const fetchBookmarks = async () => {
       try {
-        const data = await apiGet("/api/courses/bookmarks");
+        const data = await apiGet("/courses/bookmarks");
         if (data.success && Array.isArray(data.courses)) {
           setBookmarkedCourses(data.courses);
         } else {
@@ -65,12 +69,12 @@ const Dashboard = () => {
         setLoadingBookmarks(false);
       }
     };
- 
+
     // fetch user stats & enrolled courses
     const fetchUserStats = async () => {
       setStatsLoading(true);
       try {
-        const data = await apiGet("/api/stats/me");
+        const data = await apiGet("/stats/me");
         if (data.success && data.stats) {
           const s = data.stats;
           setCoursesEnrolled(s.coursesEnrolled ?? 0);
@@ -78,7 +82,9 @@ const Dashboard = () => {
           setCertificatesEarned(s.certificatesEarned ?? 0);
           setAverageScore(s.averageScore !== undefined ? s.averageScore : null);
           // enrolledCourses returned as array
-          setEnrolledCourses(Array.isArray(data.enrolledCourses) ? data.enrolledCourses : []);
+          setEnrolledCourses(
+            Array.isArray(data.enrolledCourses) ? data.enrolledCourses : [],
+          );
         } else {
           setCoursesEnrolled(0);
           setVideosWatched(0);
@@ -97,11 +103,11 @@ const Dashboard = () => {
         setStatsLoading(false);
       }
     };
- 
+
     fetchBookmarks();
     fetchUserStats();
   }, []);
- 
+
   const stats = [
     {
       label: "Courses Enrolled",
@@ -123,16 +129,20 @@ const Dashboard = () => {
     },
     {
       label: "Average Score",
-      value: statsLoading ? "…" : (averageScore !== null ? `${Math.round(averageScore)}%` : "N/A"),
+      value: statsLoading
+        ? "…"
+        : averageScore !== null
+          ? `${Math.round(averageScore)}%`
+          : "N/A",
       icon: TrendingUp,
       color: "text-primary",
     },
   ];
- 
+
   return (
     <div className="min-h-screen bg-secondary/20">
       <Navigation />
- 
+
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Welcome back, {userName}!</h1>
@@ -140,7 +150,7 @@ const Dashboard = () => {
             Track your learning progress and continue where you left off
           </p>
         </div>
- 
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map((stat) => (
@@ -159,7 +169,7 @@ const Dashboard = () => {
             </Card>
           ))}
         </div>
- 
+
         {/* Bookmarked Courses */}
         {!loadingBookmarks && bookmarkedCourses.length > 0 && (
           <div className="mb-8">
@@ -200,13 +210,15 @@ const Dashboard = () => {
             </div>
           </div>
         )}
- 
+
         {/* Continue Learning */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Continue Learning</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {enrolledCourses.length === 0 && !statsLoading ? (
-              <p className="text-muted-foreground">You are not enrolled in any courses yet.</p>
+              <p className="text-muted-foreground">
+                You are not enrolled in any courses yet.
+              </p>
             ) : (
               enrolledCourses.map((course) => {
                 const progress = Math.round(course.progress_percent ?? 0);
@@ -222,7 +234,9 @@ const Dashboard = () => {
                       <CardTitle className="text-lg">{course.title}</CardTitle>
                       <CardDescription>
                         {/* Keep the same wording, approximate completed count */}
-                        {course.videos_count ? `0 of ${course.videos_count} videos completed` : ""}
+                        {course.videos_count
+                          ? `0 of ${course.videos_count} videos completed`
+                          : ""}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -247,7 +261,7 @@ const Dashboard = () => {
             )}
           </div>
         </div>
- 
+
         {/* Recent Activity */}
         <Card>
           <CardHeader>
@@ -289,5 +303,5 @@ const Dashboard = () => {
     </div>
   );
 };
- 
+
 export default Dashboard;

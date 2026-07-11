@@ -35,8 +35,8 @@ const Navigation = () => {
   const roleLabel = user?.is_super_admin
     ? "Super Admin"
     : user?.is_admin
-    ? "Admin"
-    : "Member";
+      ? "Admin"
+      : "Member";
 
   const handleLogout = () => {
     clearAuth();
@@ -65,9 +65,7 @@ const Navigation = () => {
         try {
           const match = user.profile_image_url.match(/profile-pictures\/(.+)$/);
           if (match?.[1]) {
-            await supabase.storage
-              .from("profile-pictures")
-              .remove([match[1]]);
+            await supabase.storage.from("profile-pictures").remove([match[1]]);
           }
         } catch (err) {
           console.error("DELETE ERROR:", err);
@@ -91,7 +89,7 @@ const Navigation = () => {
 
       // SEND TO BACKEND
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/users/profile-image`,
+        `${import.meta.env.VITE_API_URL}/users/profile-image`,
         {
           method: "PATCH",
           headers: {
@@ -99,7 +97,7 @@ const Navigation = () => {
             Authorization: `Bearer ${localStorage.getItem("lt_token")}`,
           },
           body: JSON.stringify({ image_url: publicUrl }),
-        }
+        },
       );
 
       const json = await response.json();
@@ -120,7 +118,6 @@ const Navigation = () => {
     <nav className="border-b bg-background sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          
           <Link to="/" className="flex items-center">
             <img src={biztrackLogo} alt="BizTrack" className="h-10" />
           </Link>
@@ -181,7 +178,10 @@ const Navigation = () => {
               <DropdownMenuSeparator />
 
               <DropdownMenuItem asChild>
-                <button onClick={handleProfileUpload} className="w-full text-left">
+                <button
+                  onClick={handleProfileUpload}
+                  className="w-full text-left"
+                >
                   {uploading ? "Uploading..." : "Upload Profile Picture"}
                 </button>
               </DropdownMenuItem>

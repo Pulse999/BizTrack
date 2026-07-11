@@ -1,4 +1,5 @@
 // frontend/src/components/modals/AddCourseModal.tsx
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -16,7 +17,7 @@ import { apiPost } from "@/services/api";
 export interface AddCourseModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  companyId: number | null; 
+  companyId: number | null;
   onCreated: (course: any) => void;
   modalError?: string | null;
   modalLoading?: boolean;
@@ -60,11 +61,11 @@ const AddCourseModal: React.FC<AddCourseModalProps> = ({
         description: form.description,
         difficulty_level: form.difficulty_level,
         image_url: form.image_url,
-        company_id: companyId, // null = general
+        company_id: companyId, // null = general course
       };
 
-      // ✔ correct backend route
-      const data = await apiPost("/api/courses", payload);
+      // ✅ api.ts already includes /api
+      const data = await apiPost("/courses", payload);
 
       if (data?.success) {
         onCreated(data.course);
@@ -107,7 +108,9 @@ const AddCourseModal: React.FC<AddCourseModalProps> = ({
           <Label>Description</Label>
           <Input
             value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, description: e.target.value })
+            }
             disabled={modalLoading || localLoading}
           />
 
@@ -132,9 +135,16 @@ const AddCourseModal: React.FC<AddCourseModalProps> = ({
             onChange={async (e) => {
               const file = e.target.files?.[0];
               if (!file) return;
+
               try {
                 const url = await handleImageUpload(file);
-                if (url) setForm((s) => ({ ...s, image_url: url }));
+
+                if (url) {
+                  setForm((s) => ({
+                    ...s,
+                    image_url: url,
+                  }));
+                }
               } catch {
                 setLocalError("Failed to upload image");
               }
@@ -153,7 +163,9 @@ const AddCourseModal: React.FC<AddCourseModalProps> = ({
           </Button>
 
           <Button onClick={submit} disabled={modalLoading || localLoading}>
-            {modalLoading || localLoading ? "Creating..." : "Create Course"}
+            {modalLoading || localLoading
+              ? "Creating..."
+              : "Create Course"}
           </Button>
         </DialogFooter>
       </DialogContent>

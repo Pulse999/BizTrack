@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +18,12 @@ interface Props {
   onAdded: (quiz: any) => void;
 }
 
-export default function AddQuizDialog({ videoId, open, onClose, onAdded }: Props) {
+export default function AddQuizDialog({
+  videoId,
+  open,
+  onClose,
+  onAdded,
+}: Props) {
   const [title, setTitle] = useState("");
   const [passingScore, setPassingScore] = useState(80);
 
@@ -20,7 +31,7 @@ export default function AddQuizDialog({ videoId, open, onClose, onAdded }: Props
     if (!title) return;
 
     try {
-      const data = await apiPost(`/api/content/videos/${videoId}/quiz`, {
+      const data = await apiPost(`/content/videos/${videoId}/quiz`, {
         title,
         passing_score: passingScore,
       });
@@ -46,17 +57,27 @@ export default function AddQuizDialog({ videoId, open, onClose, onAdded }: Props
         <div className="space-y-4">
           <div>
             <Label>Quiz Title</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Example: Safety Knowledge Quiz" />
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Example: Safety Knowledge Quiz"
+            />
           </div>
 
           <div>
             <Label>Passing Score (%)</Label>
-            <Input type="number" value={passingScore} onChange={(e) => setPassingScore(Number(e.target.value))} />
+            <Input
+              type="number"
+              value={passingScore}
+              onChange={(e) => setPassingScore(Number(e.target.value))}
+            />
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
           <Button onClick={handleSubmit}>Add Quiz</Button>
         </DialogFooter>
       </DialogContent>

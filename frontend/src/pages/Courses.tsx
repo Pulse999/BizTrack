@@ -51,14 +51,13 @@ const Courses = () => {
 
   const userCompanyId = user?.company_id ?? null;
 
-
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         // if user is admin (not super), request include_general so backend returns both general + company courses
         const isAdmin = !!user?.is_admin;
         const qs = isAdmin ? "?include_general=true" : "";
-        const data = await apiGet(`/api/courses${qs}`);
+        const data = await apiGet(`/courses${qs}`);
         if (data.success) {
           setCourses(data.courses);
         } else {
@@ -72,7 +71,6 @@ const Courses = () => {
       }
     };
 
-
     fetchCourses();
   }, []);
 
@@ -83,7 +81,7 @@ const Courses = () => {
     // debug
     console.log("Fetching company name for id:", userCompanyId);
 
-    apiGet(`/api/companies/${userCompanyId}/name`)
+    apiGet(`/companies/${userCompanyId}/name`)
       .then((res) => {
         console.log("Company name response:", res);
         if (res.success && res.name) {
@@ -100,22 +98,22 @@ const Courses = () => {
   const handleBookmarkToggle = async (course: Course) => {
     try {
       if (course.is_bookmarked) {
-        await apiDelete(`/api/courses/${course.course_id}/bookmark`);
+        await apiDelete(`/courses/${course.course_id}/bookmark`);
         setCourses((prev) =>
           prev.map((c) =>
             c.course_id === course.course_id
               ? { ...c, is_bookmarked: false }
-              : c
-          )
+              : c,
+          ),
         );
       } else {
-        await apiPost(`/api/courses/${course.course_id}/bookmark`, {});
+        await apiPost(`/courses/${course.course_id}/bookmark`, {});
         setCourses((prev) =>
           prev.map((c) =>
             c.course_id === course.course_id
               ? { ...c, is_bookmarked: true }
-              : c
-          )
+              : c,
+          ),
         );
       }
     } catch (err) {
@@ -124,13 +122,13 @@ const Courses = () => {
   };
 
   const filteredCourses = courses.filter((c) =>
-    c.title.toLowerCase().includes(search.toLowerCase())
+    c.title.toLowerCase().includes(search.toLowerCase()),
   );
 
   // ⭐ Split courses
   const generalCourses = filteredCourses.filter((c) => !c.company_id);
   const companyCourses = filteredCourses.filter(
-    (c) => c.company_id === userCompanyId
+    (c) => c.company_id === userCompanyId,
   );
 
   if (loading) {
@@ -151,9 +149,7 @@ const Courses = () => {
         ? "N/A"
         : Number(course.avg_rating).toFixed(1);
 
-    const buttonText = course.is_enrolled
-      ? "Continue Course"
-      : "Enroll First";
+    const buttonText = course.is_enrolled ? "Continue Course" : "Enroll First";
 
     return (
       <Card
@@ -257,7 +253,7 @@ const Courses = () => {
 
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {generalCourses.map((course, idx) =>
-                renderCourseCard(course, idx)
+                renderCourseCard(course, idx),
               )}
             </div>
           </section>
@@ -266,13 +262,11 @@ const Courses = () => {
         {/* ⭐ COMPANY COURSES SECTION */}
         {companyCourses.length > 0 && (
           <section className="mb-14">
-            <h2 className="text-2xl font-bold mb-4">
-              {companyName} Courses
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">{companyName} Courses</h2>
 
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {companyCourses.map((course, idx) =>
-                renderCourseCard(course, idx)
+                renderCourseCard(course, idx),
               )}
             </div>
           </section>

@@ -23,9 +23,11 @@ const Admin: React.FC = () => {
   const { user } = getAuth();
   const isSuperAdmin = isSuperAdminUser(user);
 
-// UI state
-const [expandedCourse, setExpandedCourse] = useState<number | null>(null);
-const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({});
+  // UI state
+  const [expandedCourse, setExpandedCourse] = useState<number | null>(null);
+  const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>(
+    {},
+  );
 
   // Courses & nested content
   const [courses, setCourses] = useState<any[]>([]);
@@ -43,7 +45,9 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
 
   // Add Course modal
   const [addCourseModalOpen, setAddCourseModalOpen] = useState(false);
-  const [addCourseCompanyId, setAddCourseCompanyId] = useState<number | null>(null);
+  const [addCourseCompanyId, setAddCourseCompanyId] = useState<number | null>(
+    null,
+  );
 
   // Stats / metrics (top cards)
   const [stats, setStats] = useState<{
@@ -70,7 +74,9 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
   const [quizForm, setQuizForm] = useState({ title: "", passing_score: 80 });
 
   const [isEditingQuestion, setIsEditingQuestion] = useState(false);
-  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
+  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(
+    null,
+  );
   const [removedAnswerIds, setRemovedAnswerIds] = useState<number[]>([]);
 
   const [questionForm, setQuestionForm] = useState({
@@ -90,14 +96,21 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   // Filters / companies / unlocking used by analytics/user-controller
-  const [companies, setCompanies] = useState<{ company_id: number; name: string }[]>([]);
+  const [companies, setCompanies] = useState<
+    { company_id: number; name: string }[]
+  >([]);
   const [companyQuery, setCompanyQuery] = useState("");
-  const [selectedCompany, setSelectedCompany] = useState<{ company_id: number; name: string } | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<{
+    company_id: number;
+    name: string;
+  } | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dateRange, setDateRange] = useState<"30" | "7" | "1" | "all">("30");
 
   // Per-quiz user filter (all/passed/failed)
-  const [userFilterBy, setUserFilterBy] = useState<Record<number, "all" | "passed" | "failed">>({});
+  const [userFilterBy, setUserFilterBy] = useState<
+    Record<number, "all" | "passed" | "failed">
+  >({});
 
   // Unlocking state for per-user quizzes
   const [unlocking, setUnlocking] = useState<Record<string, boolean>>({});
@@ -105,7 +118,9 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
   // Company list filter (live)
   const companiesFiltered = useMemo(() => {
     if (!companyQuery || companyQuery.trim().length === 0) return companies;
-    return companies.filter((c) => c.name.toLowerCase().includes(companyQuery.toLowerCase()));
+    return companies.filter((c) =>
+      c.name.toLowerCase().includes(companyQuery.toLowerCase()),
+    );
   }, [companies, companyQuery]);
 
   /* -------------------------------------
@@ -115,7 +130,7 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const res = await apiPost("/api/courses/upload", fd, false);
+      const res = await apiPost("/courses/upload", fd, false);
       return res.success ? res.image_url : null;
     } catch (err) {
       console.error("Image upload failed", err);
@@ -130,7 +145,8 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
   // build stats/analytics query string (company + date)
   const statsQueryString = () => {
     const params = new URLSearchParams();
-    if (selectedCompany) params.set("company_id", String(selectedCompany.company_id));
+    if (selectedCompany)
+      params.set("company_id", String(selectedCompany.company_id));
     if (dateRange) params.set("date_range", dateRange);
     const s = params.toString();
     return s ? `?${s}` : "";
@@ -141,7 +157,7 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
     const load = async () => {
       try {
         // Courses: do NOT use posing/selectedCompany here (posing only affects analytics)
-        const res = await apiGet("/api/courses");
+        const res = await apiGet("/courses");
         if (res.success) setCourses(res.courses || []);
         else setCourses([]);
       } catch (err) {
@@ -150,8 +166,11 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
       }
 
       try {
-        const res2 = await apiGet(`/api/stats${statsQueryString()}`);
-        if (res2.success) setStats(res2.stats || { activeCourses: 0, totalVideos: 0, totalQuizzes: 0 });
+        const res2 = await apiGet(`/stats${statsQueryString()}`);
+        if (res2.success)
+          setStats(
+            res2.stats || { activeCourses: 0, totalVideos: 0, totalQuizzes: 0 },
+          );
         else setStats({ activeCourses: 0, totalVideos: 0, totalQuizzes: 0 });
       } catch (err) {
         setStats({ activeCourses: 0, totalVideos: 0, totalQuizzes: 0 });
@@ -167,7 +186,7 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
     if (!isSuperAdmin) return;
     const loadCompanies = async () => {
       try {
-        const res = await apiGet("/api/stats/companies");
+        const res = await apiGet("/stats/companies");
         if (res.success) setCompanies(res.companies || []);
       } catch (err) {
         console.error("Failed load companies", err);
@@ -180,7 +199,7 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
   const fetchAnalytics = async () => {
     setLoadingAnalytics(true);
     try {
-      const res = await apiGet(`/api/admin/analytics${statsQueryString()}`);
+      const res = await apiGet(`/admin/analytics${statsQueryString()}`);
       if (res.success && Array.isArray(res.analytics)) {
         setAnalytics(res.analytics);
 
@@ -219,13 +238,13 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
   -------------------------------------- */
   const fetchCourseNested = async (courseId: number) => {
     try {
-      const data = await apiGet(`/api/courses/${courseId}`);
+      const data = await apiGet(`/courses/${courseId}`);
       const videos: any[] = data.videos || [];
 
       const hydrated: any[] = [];
 
       for (const v of videos) {
-        const full = await apiGet(`/api/videos/${v.video_id}`);
+        const full = await apiGet(`/videos/${v.video_id}`);
         hydrated.push({
           ...v,
           quiz: full.quiz
@@ -247,16 +266,16 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
     }
   };
 
-
-
   /* -------------------------------------
     Course expand debounced loading
   -------------------------------------- */
 
-  const [courseLoading, setCourseLoading] = useState<Record<number, boolean>>({});
+  const [courseLoading, setCourseLoading] = useState<Record<number, boolean>>(
+    {},
+  );
 
   // Store timeout reference safely so React doesn't recreate it every render
-  const expandTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const expandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const toggleExpandCourse = (courseId: number) => {
     const alreadyOpen = expandedCourse === courseId;
@@ -290,7 +309,6 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
     };
   }, []);
 
-
   const toggleExpandVideo = (videoId: number) => {
     setExpandedVideos((prev) => ({ ...prev, [videoId]: !prev[videoId] }));
   };
@@ -307,7 +325,7 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
   };
 
   const submitEditCourse = async () => {
-    await apiPatch(`/api/courses/${courseEditForm.id}`, {
+    await apiPatch(`/courses/${courseEditForm.id}`, {
       title: courseEditForm.title,
       description: courseEditForm.description,
       difficulty_level: courseEditForm.difficulty_level,
@@ -315,24 +333,24 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
     });
 
     // refresh list
-    const res = await apiGet("/api/courses");
+    const res = await apiGet("/courses");
     if (res.success) setCourses(res.courses || []);
     setEditCourseModal(false);
   };
 
   const handleDeleteCourse = async (id: number) => {
     if (!confirm("Are you sure you want to delete this course?")) return;
-    await apiDelete(`/api/courses/${id}`);
+    await apiDelete(`/courses/${id}`);
     setCourses((prev) => prev.filter((c) => c.course_id !== id));
   };
 
   const toggleCourseActive = async (courseId: number, current: boolean) => {
-    const res = await apiPatch(`/api/courses/${courseId}/toggle`, {
+    const res = await apiPatch(`/courses/${courseId}/toggle`, {
       is_active: !current,
     });
 
     if (res.success) {
-      const data = await apiGet("/api/courses");
+      const data = await apiGet("/courses");
       if (data.success) setCourses(data.courses || []);
     }
   };
@@ -346,10 +364,9 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
   };
 
   const submitAddCourse = async () => {
-  const res = await apiGet("/api/courses");
-  if (res.success) setCourses(res.courses || []);
-};
-
+    const res = await apiGet("/courses");
+    if (res.success) setCourses(res.courses || []);
+  };
 
   /* -------------------------------------
      Video / quiz / question handlers (modals)
@@ -394,7 +411,11 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
     if (!videoForm.title.trim()) throw new Error("Title is required.");
     if (!videoForm.video_url.trim()) throw new Error("Video URL is required.");
 
-    await apiPost(`/api/content/courses/${activeCourseId}/videos`, videoForm, false);
+    await apiPost(
+      `/content/courses/${activeCourseId}/videos`,
+      videoForm,
+      false,
+    );
     await fetchCourseNested(activeCourseId);
     setVideoModalOpen(false);
   };
@@ -402,7 +423,7 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
   const submitEditVideo = async () => {
     if (!activeVideoId) throw new Error("Missing video ID.");
 
-    await apiPatch(`/api/content/videos/${activeVideoId}`, {
+    await apiPatch(`/content/videos/${activeVideoId}`, {
       title: videoForm.title,
       description: videoForm.description,
       video_url: videoForm.video_url,
@@ -433,13 +454,13 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
     if (ps > 100) ps = 100;
 
     if (activeQuizId) {
-      await apiPatch(`/api/content/quizzes/${activeQuizId}`, {
+      await apiPatch(`/content/quizzes/${activeQuizId}`, {
         title: quizForm.title,
         passing_score: ps,
       });
     } else {
       if (!activeVideoId) throw new Error("Missing video ID.");
-      await apiPost(`/api/content/videos/${activeVideoId}/quiz`, {
+      await apiPost(`/content/videos/${activeVideoId}/quiz`, {
         title: quizForm.title,
         passing_score: ps,
       });
@@ -500,7 +521,10 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
   const setCorrectAnswer = (index: number) => {
     setQuestionForm((prev) => ({
       ...prev,
-      answers: prev.answers.map((a: any, i: number) => ({ ...a, is_correct: i === index })),
+      answers: prev.answers.map((a: any, i: number) => ({
+        ...a,
+        is_correct: i === index,
+      })),
     }));
   };
 
@@ -527,40 +551,51 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
 
   const submitQuestion = async () => {
     if (!activeQuizId) throw new Error("Missing quiz ID.");
-    if (!questionForm.text.trim()) throw new Error("Question text is required.");
+    if (!questionForm.text.trim())
+      throw new Error("Question text is required.");
 
     const validAnswers = questionForm.answers.filter((a: any) => a.text.trim());
-    if (validAnswers.length < 2) throw new Error("At least 2 answers required.");
+    if (validAnswers.length < 2)
+      throw new Error("At least 2 answers required.");
     if (validAnswers.length > 4) throw new Error("Max 4 answers allowed.");
-    if (!validAnswers.some((a: any) => a.is_correct)) throw new Error("You must mark a correct answer.");
+    if (!validAnswers.some((a: any) => a.is_correct))
+      throw new Error("You must mark a correct answer.");
 
     if (isEditingQuestion && editingQuestionId) {
-      await apiPatch(`/api/content/questions/${editingQuestionId}`, {
+      await apiPatch(`/content/questions/${editingQuestionId}`, {
         text: questionForm.text,
       });
 
       for (const a of validAnswers) {
         if (a.answer_id) {
-          await apiPatch(`/api/content/answers/${a.answer_id}`, {
+          await apiPatch(`/content/answers/${a.answer_id}`, {
             text: a.text,
             is_correct: a.is_correct,
           });
         } else {
-          await apiPost(`/api/content/questions/${editingQuestionId}/answers`, {
-            text: a.text,
-            is_correct: a.is_correct,
-          }, false);
+          await apiPost(
+            `/content/questions/${editingQuestionId}/answers`,
+            {
+              text: a.text,
+              is_correct: a.is_correct,
+            },
+            false,
+          );
         }
       }
 
       for (const id of removedAnswerIds) {
-        await apiDelete(`/api/content/answers/${id}`);
+        await apiDelete(`/content/answers/${id}`);
       }
     } else {
-      await apiPost(`/api/content/quizzes/${activeQuizId}/questions`, {
-        text: questionForm.text,
-        answers: validAnswers,
-      }, false);
+      await apiPost(
+        `/content/quizzes/${activeQuizId}/questions`,
+        {
+          text: questionForm.text,
+          answers: validAnswers,
+        },
+        false,
+      );
     }
 
     for (const cid in courseVideos) {
@@ -579,7 +614,11 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
     const key = `${quiz_id}:${user_id}`;
     setUnlocking((s) => ({ ...s, [key]: true }));
     try {
-      const res = await apiPost(`/api/admin/analytics/unlock`, { quiz_id, user_id }, false);
+      const res = await apiPost(
+        `/admin/analytics/unlock`,
+        { quiz_id, user_id },
+        false,
+      );
       if (res.success) {
         await fetchAnalytics();
       }
@@ -599,14 +638,15 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage courses, videos, quizzes and questions</p>
+          <p className="text-muted-foreground">
+            Manage courses, videos, quizzes and questions
+          </p>
         </div>
 
         {/* SUPER ADMIN: global search + dropdown */}
         {isSuperAdmin && (
           <div className="mb-6 company-filter-wrapper relative">
             <div className="flex items-center gap-4">
-
               {/* GLOBAL SEARCHBAR */}
               <input
                 className="w-full md:w-96 border rounded-md px-3 py-2 text-sm"
@@ -647,7 +687,6 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
             {/* DROPDOWN */}
             {dropdownOpen && (
               <div className="absolute w-full md:w-96 bg-white border rounded-md shadow-lg mt-1 max-h-64 overflow-auto z-20">
-
                 {/* ALL COMPANIES OPTION */}
                 <div
                   className="px-3 py-2 hover:bg-slate-100 cursor-pointer font-medium"
@@ -667,7 +706,9 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
                   .filter((c) =>
                     companyQuery.trim() === ""
                       ? true
-                      : c.name.toLowerCase().includes(companyQuery.toLowerCase())
+                      : c.name
+                          .toLowerCase()
+                          .includes(companyQuery.toLowerCase()),
                   )
                   .map((c) => (
                     <div
@@ -687,12 +728,13 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
           </div>
         )}
 
-
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <Card>
               <CardContent className="pt-6">
-                <p className="text-2xl font-bold">{stats?.activeCourses ?? 0}</p>
+                <p className="text-2xl font-bold">
+                  {stats?.activeCourses ?? 0}
+                </p>
                 <p className="text-sm text-muted-foreground">Active Courses</p>
               </CardContent>
             </Card>
@@ -748,20 +790,22 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
           </TabsContent>
 
           <TabsContent value="user-controller">
-  <UserControllerTab
-    loadingAnalytics={loadingAnalytics}
-    analytics={analytics}
-    userFilterBy={userFilterBy}
-    setUserFilterBy={setUserFilterBy}
-    handleUnlockUserQuiz={handleUnlockUserQuiz}
-    unlocking={unlocking}
-    companies={companies}  // <-- NEW LINE (REQUIRED)
-  />
-</TabsContent>
-
+            <UserControllerTab
+              loadingAnalytics={loadingAnalytics}
+              analytics={analytics}
+              userFilterBy={userFilterBy}
+              setUserFilterBy={setUserFilterBy}
+              handleUnlockUserQuiz={handleUnlockUserQuiz}
+              unlocking={unlocking}
+              companies={companies} // <-- NEW LINE (REQUIRED)
+            />
+          </TabsContent>
 
           <TabsContent value="user-analytics">
-            <UserAnalyticsTab dateRange={dateRange} setDateRange={setDateRange} />
+            <UserAnalyticsTab
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+            />
           </TabsContent>
         </Tabs>
       </main>
@@ -846,4 +890,3 @@ const [expandedVideos, setExpandedVideos] = useState<Record<number, boolean>>({}
 };
 
 export default Admin;
-

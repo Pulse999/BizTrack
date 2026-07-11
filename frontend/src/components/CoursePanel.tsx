@@ -61,7 +61,9 @@ const CoursePanel = ({
 
           <div className="flex-1">
             <p className="font-medium">{course.title}</p>
-            <p className="text-sm text-muted-foreground">{course.description}</p>
+            <p className="text-sm text-muted-foreground">
+              {course.description}
+            </p>
           </div>
         </div>
 
@@ -183,7 +185,7 @@ const CoursePanel = ({
                       size="sm"
                       onClick={async () => {
                         if (!confirm("Delete this video?")) return;
-                        await apiDelete(`/api/content/videos/${v.video_id}`);
+                        await apiDelete(`/content/videos/${v.video_id}`);
                         await fetchCourseNested(course.course_id);
                       }}
                     >
@@ -240,7 +242,7 @@ const CoursePanel = ({
                             onClick={async () => {
                               if (!confirm("Delete this quiz?")) return;
                               await apiDelete(
-                                `/api/content/quizzes/${v.quiz.quiz_id}`
+                                `/content/quizzes/${v.quiz.quiz_id}`,
                               );
                               await fetchCourseNested(course.course_id);
                             }}
@@ -287,7 +289,7 @@ const CoursePanel = ({
                                     if (!confirm("Delete this question?"))
                                       return;
                                     await apiDelete(
-                                      `/api/content/questions/${q.question_id}`
+                                      `/content/questions/${q.question_id}`,
                                     );
                                     await fetchCourseNested(course.course_id);
                                   }}

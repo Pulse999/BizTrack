@@ -15,7 +15,7 @@ const UserAnalyticsTab = ({ dateRange, setDateRange }: Props) => {
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const res = await apiGet(`/api/admin/analytics?date_range=${dateRange}`);
+      const res = await apiGet(`/admin/analytics?date_range=${dateRange}`);
       if (res.success) {
         setAnalytics(res.analyticsLive || res.analytics || null);
       }
@@ -54,23 +54,22 @@ const UserAnalyticsTab = ({ dateRange, setDateRange }: Props) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Users"
-          value={loading ? "—" : analytics?.totalUsers ?? 0}
+          value={loading ? "—" : (analytics?.totalUsers ?? 0)}
         />
         <StatCard
           label="Enrolled Users"
-          value={loading ? "—" : analytics?.enrolledUsers ?? 0}
+          value={loading ? "—" : (analytics?.enrolledUsers ?? 0)}
         />
         <StatCard
           label="Average Score"
-          value={
-            loading ? "—" : `${analytics?.averageScore ?? 0}%`
-          }
+          value={loading ? "—" : `${analytics?.averageScore ?? 0}%`}
         />
         <StatCard
           label="Locked Out"
           value={
-            loading ? "—" :
-            analytics?.courseCompletionBreakdown?.locked_out ?? 0
+            loading
+              ? "—"
+              : (analytics?.courseCompletionBreakdown?.locked_out ?? 0)
           }
         />
       </div>
@@ -85,10 +84,22 @@ const UserAnalyticsTab = ({ dateRange, setDateRange }: Props) => {
           <div className="flex flex-col md:flex-row md:items-start gap-8">
             <PieChart
               data={[
-                { label: "Passed", value: analytics.courseCompletionBreakdown?.passed || 0 },
-                { label: "Failed", value: analytics.courseCompletionBreakdown?.failed || 0 },
-                { label: "Locked Out", value: analytics.courseCompletionBreakdown?.locked_out || 0 },
-                { label: "Not Started", value: analytics.courseCompletionBreakdown?.not_started || 0 },
+                {
+                  label: "Passed",
+                  value: analytics.courseCompletionBreakdown?.passed || 0,
+                },
+                {
+                  label: "Failed",
+                  value: analytics.courseCompletionBreakdown?.failed || 0,
+                },
+                {
+                  label: "Locked Out",
+                  value: analytics.courseCompletionBreakdown?.locked_out || 0,
+                },
+                {
+                  label: "Not Started",
+                  value: analytics.courseCompletionBreakdown?.not_started || 0,
+                },
               ]}
               size={240}
             />
