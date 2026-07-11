@@ -19,18 +19,34 @@ import companyRoutes from "./routes/companyRoutes";
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:8080",
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+  ...(process.env.FRONTEND_URLS
+    ? process.env.FRONTEND_URLS.split(",").map((origin) => origin.trim())
+    : []),
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:3000",
-      "http://localhost:8080",
-      ...(process.env.FRONTEND_URL
-        ? [process.env.FRONTEND_URL]
-        : []),
-    ],
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      const isAllowedOrigin =
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/.*\.vercel\.app$/i.test(origin);
+
+      callback(null, isAllowedOrigin);
+    },
     credentials: true,
-  })
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+  }),
 );
 
 app.use(bodyParser.json());
